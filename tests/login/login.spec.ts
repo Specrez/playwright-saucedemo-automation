@@ -17,7 +17,7 @@ test.describe('Login Tests', () => {
       users.standard.password
     );
 
-    await expect(page).toHaveURL(/inventory.html/);
+    await expect(page).toHaveURL(/inve.html/);
     await expect(page.getByText('Products')).toBeVisible();
   });
 
