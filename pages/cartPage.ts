@@ -54,4 +54,7 @@ export class CartPage {
   async continueShopping() {
     await this.continueShoppingButton.click();
   }
+  async openCart() {
+  await this.page.locator('.shopping_cart_link').click();
+}
 }

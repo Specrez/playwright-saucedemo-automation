@@ -1,14 +1,16 @@
-import { test, expect } from '../../fixtures/testFixture';
+import { test, expect } from '@playwright/test';
 import { LoginPage } from '../../pages/LoginPage';
 import { users } from '../../test-data/users';
 
-test.describe('Login Functionality', () => {
+test.describe('Login Tests', () => {
 
-  test('Valid user should login successfully', async ({ page }) => {
-
+  test.beforeEach(async ({ page }) => {
     const loginPage = new LoginPage(page);
-
     await loginPage.goto();
+  });
+
+  test('should login successfully with valid credentials', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
     await loginPage.login(
       users.standard.username,
@@ -16,46 +18,84 @@ test.describe('Login Functionality', () => {
     );
 
     await expect(page).toHaveURL(/inventory.html/);
-
-    await expect(
-      page.getByText('Products')
-    ).toBeVisible();
-
+    await expect(page.getByText('Products')).toBeVisible();
   });
 
-});
+  test('should display error for locked out user', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
+    await loginPage.login(
+      users.locked.username,
+      users.locked.password
+    );
 
+    await expect(loginPage.errorMessage).toBeVisible();
 
-test('Invalid credentials should display error message', async ({ page }) => {
+    await expect(loginPage.errorMessage)
+      .toContainText('locked out');
+  });
 
-  const loginPage = new LoginPage(page);
+  test('should reject invalid username', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
-  await loginPage.goto();
+    await loginPage.login(
+      'invalid_user',
+      users.standard.password
+    );
 
-  await loginPage.login(
-    users.invalid.username,
-    users.invalid.password
-  );
+    await expect(loginPage.errorMessage).toBeVisible();
+  });
 
-  await expect(
-    page.locator('[data-test="error"]')
-  ).toContainText('Username and password do not match');
-});
+  test('should reject invalid password', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
+    await loginPage.login(
+      users.standard.username,
+      'wrong_password'
+    );
 
-test('Locked user should not login', async ({ page }) => {
+    await expect(loginPage.errorMessage).toBeVisible();
+  });
 
-  const loginPage = new LoginPage(page);
+  test('should reject invalid username and password', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
-  await loginPage.goto();
+    await loginPage.login(
+      'invalid_user',
+      'wrong_password'
+    );
 
-  await loginPage.login(
-    users.locked.username,
-    users.locked.password
-  );
+    await expect(loginPage.errorMessage).toBeVisible();
+  });
 
-  await expect(
-    page.locator('[data-test="error"]')
-  ).toContainText('Sorry, this user has been locked out.');
+  test('should require username', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+
+    await loginPage.login(
+      '',
+      users.standard.password
+    );
+
+    await expect(loginPage.errorMessage).toBeVisible();
+  });
+
+  test('should require password', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+
+    await loginPage.login(
+      users.standard.username,
+      ''
+    );
+
+    await expect(loginPage.errorMessage).toBeVisible();
+  });
+
+  test('should require username and password', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+
+    await loginPage.login('', '');
+
+    await expect(loginPage.errorMessage).toBeVisible();
+  });
+
 });
