@@ -1,7 +1,5 @@
 import { test, expect } from '../../fixtures/testFixture';
-import { LoginPage } from '../../pages/LoginPage';
 import { InventoryPage } from '../../pages/InventoryPage';
-import { users } from '../../test-data/users';
 
 test.describe('Inventory Functionality', () => {
 

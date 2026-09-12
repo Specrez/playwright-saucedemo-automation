@@ -46,19 +46,16 @@ test.describe('Cart Navigation and Multi-Product Tests', () => {
 
     await page.locator('.shopping_cart_link').click();
 
-    await expect(page.locator('.cart_item')).toHaveCount(3);
+await expect(page.locator('.cart_item')).toHaveCount(3);
 
-    await expect(page.locator('.cart_item')).toContainText(
-      'Sauce Labs Backpack'
-    );
+await expect(page.getByText('Sauce Labs Backpack', { exact: true }))
+  .toBeVisible();
 
-    await expect(page.locator('.cart_item')).toContainText(
-      'Sauce Labs Bike Light'
-    );
+await expect(page.getByText('Sauce Labs Bike Light', { exact: true }))
+  .toBeVisible();
 
-    await expect(page.locator('.cart_item')).toContainText(
-      'Sauce Labs Bolt T-Shirt'
-    );
+await expect(page.getByText('Sauce Labs Bolt T-Shirt', { exact: true }))
+  .toBeVisible();
   });
 
   test('should update cart badge when removing one of multiple products', async ({ page }) => {
