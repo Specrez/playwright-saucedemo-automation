@@ -1,118 +1,95 @@
-import { test, expect } from "@playwright/test";
-import { LoginPage } from "../../pages/LoginPage";
-import { InventoryPage } from "../../pages/InventoryPage";
-import { ProductDetailsPage } from "../../pages/ProductDetailsPage";
-import { users } from "../../test-data/users";
+import { test, expect } from '../../fixtures/testFixture';
 
-test.describe("Product Details Tests", () => {
+test.describe('Product Details Tests', () => {
 
-  test.beforeEach(async ({ page }) => {
-    const loginPage = new LoginPage(page);
+    test.beforeEach(async ({
+        authenticatedPage,
+        inventoryPage,
+        productDetailsPage
+    }) => {
+        await inventoryPage.verifyInventoryPage();
 
-    await loginPage.goto();
+        await inventoryPage.openProduct(
+            'Sauce Labs Backpack'
+        );
 
-    await loginPage.login(
-      users.standard.username,
-      users.standard.password
-    );
+        // Explicitly wait until product details page is ready
+        await productDetailsPage.verifyProductDetailsPage();
+    });
 
-    await expect(page).toHaveURL(/inventory.html/);
-  });
+    test('should open product details by clicking product name', async ({
+        productDetailsPage
+    }) => {
+        await productDetailsPage.verifyProductDetailsPage();
+    });
 
+    test('should display product description', async ({
+        productDetailsPage
+    }) => {
+        await expect(
+            productDetailsPage.productDescription
+        ).toBeVisible();
 
-  test("should open product details by clicking product name", async ({ page }) => {
-    const inventoryPage = new InventoryPage(page);
+        await expect(
+            productDetailsPage.productDescription
+        ).not.toHaveText('');
+    });
 
-    await inventoryPage.openProduct("Sauce Labs Backpack");
+    test('should display product price', async ({
+        productDetailsPage
+    }) => {
+        await expect(
+            productDetailsPage.productPrice
+        ).toBeVisible();
 
-    await expect(page).toHaveURL(/inventory-item\.html/);
+        await expect(
+            productDetailsPage.productPrice
+        ).toHaveText(/\$\d+\.\d{2}/);
+    });
 
-    await expect(
-      page.getByText("Sauce Labs Backpack", { exact: true })
-    ).toBeVisible();
-  });
+    test('should display add to cart button', async ({
+        productDetailsPage
+    }) => {
+        await expect(
+            productDetailsPage.addToCartButton
+        ).toHaveCount(1);
 
+        await expect(
+            productDetailsPage.addToCartButton
+        ).toBeVisible();
 
-  test("should display product description", async ({ page }) => {
-    const inventoryPage = new InventoryPage(page);
+        await expect(
+            productDetailsPage.addToCartButton
+        ).toHaveText('Add to cart');
+    });
 
-    await inventoryPage.openProduct("Sauce Labs Backpack");
+    test('should add product to cart from product details', async ({
+        productDetailsPage
+    }) => {
+        await productDetailsPage.addToCart();
 
-    await expect(
-      page.getByText(/carry.allthethings/i)
-    ).toBeVisible();
-  });
+        await productDetailsPage.verifyAddedToCart();
+    });
 
+    test('should remove product from cart from product details', async ({
+        productDetailsPage
+    }) => {
+        await productDetailsPage.addToCart();
 
-  test("should display product price", async ({ page }) => {
-    const inventoryPage = new InventoryPage(page);
+        await productDetailsPage.verifyAddedToCart();
 
-    await inventoryPage.openProduct("Sauce Labs Backpack");
+        await productDetailsPage.removeFromCart();
 
-    await expect(
-      page.locator(".inventory_details_price")
-    ).toBeVisible();
-  });
+        await productDetailsPage.verifyRemovedFromCart();
+    });
 
+    test('should return to inventory using Back to products', async ({
+        productDetailsPage,
+        inventoryPage
+    }) => {
+        await productDetailsPage.backToProducts();
 
-  test("should display add to cart button", async ({ page }) => {
-    const inventoryPage = new InventoryPage(page);
-
-    await inventoryPage.openProduct("Sauce Labs Backpack");
-
-    await expect(
-      page.getByRole("button", { name: "Add to cart" })
-    ).toBeVisible();
-  });
-
-
-  test("should add product to cart from product details", async ({ page }) => {
-    const inventoryPage = new InventoryPage(page);
-    const productDetailsPage = new ProductDetailsPage(page);
-
-    await inventoryPage.openProduct("Sauce Labs Backpack");
-
-    await productDetailsPage.verifyProductDetailsPage();
-
-    await productDetailsPage.addToCart();
-
-    await productDetailsPage.verifyAddedToCart();
-  });
-
-
-  test("should remove product from cart from product details", async ({ page }) => {
-    const inventoryPage = new InventoryPage(page);
-    const productDetailsPage = new ProductDetailsPage(page);
-
-    await inventoryPage.openProduct("Sauce Labs Backpack");
-
-    await productDetailsPage.verifyProductDetailsPage();
-
-    await productDetailsPage.addToCart();
-
-    await productDetailsPage.verifyAddedToCart();
-
-    await productDetailsPage.removeFromCart();
-
-    await productDetailsPage.verifyRemovedFromCart();
-  });
-
-
-  test("should return to inventory using Back to products", async ({ page }) => {
-    const inventoryPage = new InventoryPage(page);
-    const productDetailsPage = new ProductDetailsPage(page);
-
-    await inventoryPage.openProduct("Sauce Labs Backpack");
-
-    await productDetailsPage.verifyProductDetailsPage();
-
-    await productDetailsPage.backToProducts();
-
-    await expect(page).toHaveURL(/inventory.html/);
-
-    await expect(
-      page.getByText("Products")
-    ).toBeVisible();
-  });
+        await inventoryPage.verifyInventoryPage();
+    });
 
 });

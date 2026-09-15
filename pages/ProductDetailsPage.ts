@@ -1,61 +1,89 @@
 import { expect, Locator, Page } from '@playwright/test';
 
 export class ProductDetailsPage {
-  readonly page: Page;
-  readonly productName: Locator;
-  readonly productDescription: Locator;
-  readonly productPrice: Locator;
-  readonly addToCartButton: Locator;
-  readonly removeButton: Locator;
-  readonly backToProductsButton: Locator;
-  readonly cartBadge: Locator;
+    readonly page: Page;
+    readonly productName: Locator;
+    readonly productDescription: Locator;
+    readonly productPrice: Locator;
+    readonly addToCartButton: Locator;
+    readonly removeButton: Locator;
+    readonly backToProductsButton: Locator;
+    readonly cartBadge: Locator;
 
-  constructor(page: Page) {
-    this.page = page;
+    constructor(page: Page) {
+        this.page = page;
 
-    this.productName = page.locator('.inventory_details_name');
-    this.productDescription = page.locator('.inventory_details_desc');
-    this.productPrice = page.locator('.inventory_details_price');
+        this.productName = page.locator('.inventory_details_name');
 
-    this.addToCartButton = page.getByRole('button', {
-      name: 'Add to cart'
-    });
+        this.productDescription = page.locator(
+            '.inventory_details_desc'
+        );
 
-    this.removeButton = page.getByRole('button', {
-      name: 'Remove'
-    });
+        this.productPrice = page.locator(
+            '.inventory_details_price'
+        );
 
-    this.backToProductsButton = page.getByRole('button', {
-      name: 'Back to products'
-    });
+        this.addToCartButton = page.locator(
+            '.inventory_details button[data-test^="add-to-cart"]'
+        );
 
-    this.cartBadge = page.locator('.shopping_cart_badge');
-  }
+        this.removeButton = page.locator(
+            '.inventory_details button[data-test^="remove"]'
+        );
 
-  async verifyProductDetailsPage() {
-    await expect(this.page).toHaveURL(/inventory-item\.html/);
-    await expect(this.productName).toBeVisible();
-  }
+        this.backToProductsButton = page.getByRole(
+            'button',
+            { name: 'Back to products' }
+        );
 
-  async addToCart() {
-    await this.addToCartButton.click();
-  }
+        this.cartBadge = page.locator(
+            '.shopping_cart_badge'
+        );
+    }
 
-  async removeFromCart() {
-    await this.removeButton.click();
-  }
+    async verifyProductDetailsPage() {
+        await expect(this.page).toHaveURL(
+            /inventory-item\.html/
+        );
 
-  async verifyAddedToCart() {
-    await expect(this.removeButton).toBeVisible();
-    await expect(this.cartBadge).toHaveText('1');
-  }
+        await expect(this.productName).toBeVisible();
+    }
 
-  async verifyRemovedFromCart() {
-    await expect(this.addToCartButton).toBeVisible();
-    await expect(this.cartBadge).not.toBeVisible();
-  }
+    async addToCart() {
+        await this.verifyProductDetailsPage();
 
-  async backToProducts() {
-    await this.backToProductsButton.click();
-  }
+        await expect(this.addToCartButton).toHaveCount(1);
+        await expect(this.addToCartButton).toBeVisible();
+
+        await this.addToCartButton.click();
+    }
+
+    async removeFromCart() {
+        await this.verifyProductDetailsPage();
+
+        await expect(this.removeButton).toHaveCount(1);
+        await expect(this.removeButton).toBeVisible();
+
+        await this.removeButton.click();
+    }
+
+    async verifyAddedToCart() {
+        await expect(this.removeButton).toBeVisible();
+
+        await expect(this.cartBadge).toHaveText('1');
+    }
+
+    async verifyRemovedFromCart() {
+        await expect(this.addToCartButton).toBeVisible();
+
+        await expect(this.cartBadge).not.toBeVisible();
+    }
+
+    async backToProducts() {
+        await this.backToProductsButton.click();
+
+        await expect(this.page).toHaveURL(
+            /inventory\.html/
+        );
+    }
 }

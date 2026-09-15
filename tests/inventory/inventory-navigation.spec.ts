@@ -1,67 +1,78 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/LoginPage';
-import { InventoryPage } from '../../pages/InventoryPage';
-import { users } from '../../test-data/users';
+import { test, expect } from '../../fixtures/testFixture';
 
 test.describe('Inventory Navigation Tests', () => {
 
-  test.beforeEach(async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    await loginPage.goto();
+    test.beforeEach(async ({
+        authenticatedPage,
+        inventoryPage
+    }) => {
+        await inventoryPage.verifyInventoryPage();
+    });
 
-    await loginPage.login(
-      users.standard.username,
-      users.standard.password
-    );
+    test('should display all inventory products', async ({
+        inventoryPage
+    }) => {
+        const productCount = await inventoryPage.getProductCount();
 
-    await expect(page).toHaveURL(/inventory.html/);
-  });
+        expect(productCount).toBe(6);
+    });
 
-  test('should display all inventory products', async ({ page }) => {
-    const inventoryPage = new InventoryPage(page);
+    test('should display product names', async ({
+        inventoryPage
+    }) => {
+        const productNames = await inventoryPage.getProductNames();
 
-    await expect(inventoryPage.productItems).toHaveCount(6);
-  });
+        expect(productNames).toHaveLength(6);
+    });
 
-  test('should display product names', async ({ page }) => {
-    const inventoryPage = new InventoryPage(page);
+    test('should display product prices', async ({
+        inventoryPage
+    }) => {
+        const productPrices = await inventoryPage.getProductPrices();
 
-    const names = await inventoryPage.getProductNames();
+        expect(productPrices).toHaveLength(6);
+    });
 
-    expect(names.length).toBe(6);
-  });
+    test('should open product details from product image', async ({
+        page,
+        inventoryPage,
+        productDetailsPage
+    }) => {
+        const firstProduct = inventoryPage.productItems.first();
 
-  test('should display product prices', async ({ page }) => {
-    const inventoryPage = new InventoryPage(page);
+        await firstProduct
+            .locator('.inventory_item_img a')
+            .click();
 
-    const prices = await inventoryPage.getProductPrices();
+        await productDetailsPage.verifyProductDetailsPage();
+    });
 
-    expect(prices.length).toBe(6);
-  });
+    test('should open product details from product name', async ({
+        inventoryPage,
+        productDetailsPage
+    }) => {
+        await inventoryPage.openProduct(
+            'Sauce Labs Backpack'
+        );
 
-  test('should open product details from product image', async ({ page }) => {
-    await page.locator('.inventory_item_img').first().click();
+        await productDetailsPage.verifyProductDetailsPage();
+    });
 
-    await expect(page).toHaveURL(/inventory-item\.html/);
-  });
+    test('should display shopping cart link', async ({
+        inventoryPage
+    }) => {
+        await expect(
+            inventoryPage.cartLink
+        ).toBeVisible();
+    });
 
-  test('should open product details from product name', async ({ page }) => {
-    await page.locator('.inventory_item_name').first().click();
+    test('should navigate to cart from inventory', async ({
+        inventoryPage,
+        cartPage
+    }) => {
+        await inventoryPage.openCart();
 
-    await expect(page).toHaveURL(/inventory-item\.html/);
-  });
-
-  test('should display shopping cart link', async ({ page }) => {
-    await expect(
-      page.locator('.shopping_cart_link')
-    ).toBeVisible();
-  });
-
-  test('should navigate to cart from inventory', async ({ page }) => {
-    await page.locator('.shopping_cart_link').click();
-
-    await expect(page).toHaveURL(/cart\.html/);
-    await expect(page.getByText('Your Cart')).toBeVisible();
-  });
+        await cartPage.verifyCartPage();
+    });
 
 });

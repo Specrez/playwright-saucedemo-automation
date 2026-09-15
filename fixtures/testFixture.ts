@@ -1,60 +1,56 @@
 import { test as base, expect } from '@playwright/test';
-import { Page } from '@playwright/test';
+
 import { LoginPage } from '../pages/LoginPage';
 import { InventoryPage } from '../pages/InventoryPage';
+import { ProductDetailsPage } from '../pages/ProductDetailsPage';
 import { CartPage } from '../pages/CartPage';
 import { CheckoutPage } from '../pages/CheckoutPage';
-
 import { users } from '../test-data/users';
 
 type TestFixtures = {
-  loginPage: LoginPage;
-  inventoryPage: InventoryPage;
-  cartPage: CartPage;
-  checkoutPage: CheckoutPage;
-  authenticatedPage: Page;
+    loginPage: LoginPage;
+    inventoryPage: InventoryPage;
+    productDetailsPage: ProductDetailsPage;
+    cartPage: CartPage;
+    checkoutPage: CheckoutPage;
+    authenticatedPage: void;
 };
 
 export const test = base.extend<TestFixtures>({
+    authenticatedPage: async ({ page }, use) => {
+        const loginPage = new LoginPage(page);
 
-  loginPage: async ({ page }, use) => {
-    const loginPage = new LoginPage(page);
+        await loginPage.goto();
 
-    await use(loginPage);
-  },
+        await loginPage.login(
+            users.standard.username,
+            users.standard.password
+        );
 
-  inventoryPage: async ({ page }, use) => {
-    const inventoryPage = new InventoryPage(page);
+        await expect(page).toHaveURL(/inventory\.html/);
 
-    await use(inventoryPage);
-  },
+        await use();
+    },
 
-  cartPage: async ({ page }, use) => {
-    const cartPage = new CartPage(page);
+    loginPage: async ({ page }, use) => {
+        await use(new LoginPage(page));
+    },
 
-    await use(cartPage);
-  },
+    inventoryPage: async ({ page }, use) => {
+        await use(new InventoryPage(page));
+    },
 
-  checkoutPage: async ({ page }, use) => {
-    const checkoutPage = new CheckoutPage(page);
+    productDetailsPage: async ({ page }, use) => {
+        await use(new ProductDetailsPage(page));
+    },
 
-    await use(checkoutPage);
-  },
+    cartPage: async ({ page }, use) => {
+        await use(new CartPage(page));
+    },
 
-authenticatedPage: async ({ page }, use) => {
-  const loginPage = new LoginPage(page);
-
-  await loginPage.goto();
-
-  await loginPage.login(
-    users.standard.username,
-    users.standard.password
-  );
-
-  await expect(page).toHaveURL(/inventory.html/);
-
-  await use(page);
-},
+    checkoutPage: async ({ page }, use) => {
+        await use(new CheckoutPage(page));
+    },
 });
 
 export { expect };

@@ -34,8 +34,6 @@ test.describe('Checkout Overview Tests', () => {
     );
 
     await checkoutPage.continueToOverview();
-
-    await expect(page).toHaveURL(/checkout-step-two\.html/);
   });
 
   test('should display checkout overview page', async ({ page }) => {

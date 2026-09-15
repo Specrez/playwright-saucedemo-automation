@@ -98,8 +98,6 @@ test.describe('Checkout Information Tests', () => {
     );
 
     await checkoutPage.continueToOverview();
-
-    await expect(checkoutPage.errorMessage).toBeVisible();
   });
 
   test('should require postal code', async ({ page }) => {

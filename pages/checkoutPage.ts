@@ -1,4 +1,4 @@
-import { expect, Locator, Page } from '@playwright/test';
+import { expect, Locator, Page } from "@playwright/test";
 
 export class CheckoutPage {
   readonly page: Page;
@@ -26,41 +26,39 @@ export class CheckoutPage {
     this.page = page;
 
     // Checkout information
-    this.pageTitle = page.getByText('Checkout: Your Information');
+    this.pageTitle = page.getByText("Checkout: Your Information");
 
-    this.firstNameInput = page.getByPlaceholder('First Name');
-    this.lastNameInput = page.getByPlaceholder('Last Name');
-    this.postalCodeInput = page.getByPlaceholder('Zip/Postal Code');
+    this.firstNameInput = page.getByPlaceholder("First Name");
+    this.lastNameInput = page.getByPlaceholder("Last Name");
+    this.postalCodeInput = page.getByPlaceholder("Zip/Postal Code");
 
-    this.continueButton = page.getByRole('button', {
-      name: 'Continue',
+    this.continueButton = page.getByRole("button", {
+      name: "Continue",
     });
 
-    this.cancelButton = page.getByRole('button', {
-      name: 'Cancel',
+    this.cancelButton = page.getByRole("button", {
+      name: "Cancel",
     });
 
     this.errorMessage = page.locator('[data-test="error"]');
 
     // Checkout overview
-    this.paymentInformation = page.getByText('Payment Information');
-    this.shippingInformation = page.getByText('Shipping Information');
+    this.paymentInformation = page.getByText("Payment Information");
+    this.shippingInformation = page.getByText("Shipping Information");
 
-    this.itemTotal = page.locator('.summary_subtotal_label');
-    this.tax = page.locator('.summary_tax_label');
-    this.total = page.locator('.summary_total_label');
+    this.itemTotal = page.locator(".summary_subtotal_label");
+    this.tax = page.locator(".summary_tax_label");
+    this.total = page.locator(".summary_total_label");
 
-    this.finishButton = page.getByRole('button', {
-      name: 'Finish',
+    this.finishButton = page.getByRole("button", {
+      name: "Finish",
     });
 
     // Checkout complete
-    this.confirmationMessage = page.getByText(
-      'Thank you for your order!'
-    );
+    this.confirmationMessage = page.getByText("Thank you for your order!");
 
-    this.backHomeButton = page.getByRole('button', {
-      name: 'Back Home',
+    this.backHomeButton = page.getByRole("button", {
+      name: "Back Home",
     });
   }
 
@@ -71,7 +69,7 @@ export class CheckoutPage {
   async enterCustomerInformation(
     firstName: string,
     lastName: string,
-    postalCode: string
+    postalCode: string,
   ) {
     await this.firstNameInput.fill(firstName);
     await this.lastNameInput.fill(lastName);
@@ -79,6 +77,9 @@ export class CheckoutPage {
   }
 
   async continueToOverview() {
+    await expect(this.continueButton).toBeVisible();
+    await expect(this.continueButton).toBeEnabled();
+
     await this.continueButton.click();
   }
 
@@ -87,9 +88,7 @@ export class CheckoutPage {
   }
 
   async verifyCheckoutOverview() {
-    await expect(
-      this.page.getByText('Checkout: Overview')
-    ).toBeVisible();
+    await expect(this.page.getByText("Checkout: Overview")).toBeVisible();
   }
 
   async getItemTotal() {

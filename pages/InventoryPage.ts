@@ -31,27 +31,35 @@ export class InventoryPage {
 
   async verifyInventoryPage() {
     await expect(this.pageTitle).toBeVisible();
+    await expect(this.productItems).toHaveCount(6);
   }
 
   async getProductCount() {
+    await expect(this.productItems).toHaveCount(6);
     return await this.productItems.count();
   }
 
   async getProductNames() {
+    await expect(this.productItems).toHaveCount(6);
     return await this.productNames.allTextContents();
   }
 
   async getProductPrices() {
+    await expect(this.productItems).toHaveCount(6);
     return await this.productPrices.allTextContents();
   }
 
   async sortProducts(option: "az" | "za" | "lohi" | "hilo") {
     await expect(this.sortDropdown).toBeVisible();
+
     await this.sortDropdown.selectOption(option);
+
     await expect(this.sortDropdown).toHaveValue(option);
   }
 
   async addProductToCart(productName: string) {
+    await expect(this.productItems).toHaveCount(6);
+
     const product = this.productItems.filter({
       hasText: productName,
     });
@@ -60,6 +68,8 @@ export class InventoryPage {
   }
 
   async removeProductFromCart(productName: string) {
+    await expect(this.productItems).toHaveCount(6);
+
     const product = this.productItems.filter({
       hasText: productName,
     });
@@ -81,10 +91,19 @@ export class InventoryPage {
   }
 
 async openProduct(productName: string) {
-  const product = this.productItems.filter({
-    hasText: productName,
-  });
+    await expect(this.productItems).toHaveCount(6);
 
-  await product.locator(".inventory_item_name").click();
+    const product = this.productItems.filter({
+        hasText: productName,
+    });
+
+    await expect(product).toHaveCount(1);
+
+    await product
+        .locator('.inventory_item_name')
+        .click();
+
+    await expect(this.page)
+        .toHaveURL(/inventory-item\.html/);
 }
 }
